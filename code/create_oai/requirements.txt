@@ -1,0 +1,1 @@
+cfn-resource==0.2.2
