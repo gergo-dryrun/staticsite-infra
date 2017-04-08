@@ -1,0 +1,111 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Creates CloudFront distribution with s3 as origin.'
+
+Parameters:
+  DomainName:
+    Description: FQDN of site
+    Type: String
+    Default: gergo.me
+  AcmCertArn:
+    Description: ARN of ACM Certificate deployed in us-east-1
+    Type: String
+    Default: "arn:"
+  S3CanonicalUserId:
+    Description: S3CanonicalUserId of Origin Access Identity
+    Type: String
+  OriginAccessId:
+    Description: Id of Origin Access Identity
+    Type: String
+
+Resources:
+
+  CfDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn:
+      - PrdS3Bucket
+    Properties:
+      DistributionConfig:
+        Origins:
+        - DomainName: !Sub live.${DomainName}.s3.amazonaws.com
+          Id: live-s3-origin
+          S3OriginConfig:
+             OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessId} #origin-access-identity/cloudfront/E3G6KARSXLIZJA #!Sub
+#               - origin-access-identity/cloudfront/${OAI}
+#               - OAI: !GetAtt CloudFrontOAI.id
+        Enabled: true
+        HttpVersion: http2
+        # IsIPV6Enabled: true
+        # Apparently not yet available
+        # Encountered unsupported property IsIPV6Enabled
+        Aliases:
+          - !Ref DomainName
+          - !Sub www.${DomainName}
+        DefaultRootObject: index.html
+        Comment: !Sub Distribution for ${DomainName} and www.${DomainName}
+#          !Join
+#            - ' '
+#            - !Ref AllDomainNames
+        DefaultCacheBehavior:
+          TargetOriginId: live-s3-origin
+          Compress: true
+          ForwardedValues:
+            QueryString: false
+          ViewerProtocolPolicy: redirect-to-https
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+#          AcmCertificateArn: !Ref AcmCertArn
+#          MinimumProtocolVersion: TLSv1
+#          SslSupportMethod: sni-only
+          CloudFrontDefaultCertificate: true
+##      WebACLId: !Ref WebAcl
+
+  PrdS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !Sub live.${DomainName}
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  LiveBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Sub live.${DomainName}
+      PolicyDocument:
+        Statement:
+          -
+            Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource: !Sub arn:aws:s3:::live.${DomainName}/*
+            Principal:
+              CanonicalUser: !Ref S3CanonicalUserId
+
+  baseRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !Sub ${DomainName}.
+      AliasTarget:
+        HostedZoneId: Z2FDTNDATAQYW2 # CloudFront hosted zone
+        DNSName: !GetAtt CfDistribution.DomainName
+      Comment: DNS name for FQDN.
+      Name: !Sub www.${DomainName}.
+      Type: A
+
+  wwwRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !Sub ${DomainName}.
+      AliasTarget:
+        HostedZoneId: Z2FDTNDATAQYW2 # CloudFront
+        DNSName: !GetAtt CfDistribution.DomainName
+      Comment: DNS name for wwww.
+      Name: !Sub ${DomainName}.
+      Type: A
+
+Outputs:
+  LiveWebsiteURL:
+    Value: !Sub https://${baseRecordSet}
+    Description: URL for live site exposed via CloudFront
+
