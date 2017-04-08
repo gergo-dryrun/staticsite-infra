@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Creates ACM Certificate. MUST BE DEPLOYED US-EAST-1'
+
+Parameters:
+  DomainName:
+    Description: Domain name for certificate.
+    Type: String
+    Default: gergo.me
+Resources:
+  AcmCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      SubjectAlternativeNames:
+        - !Ref DomainName
+        - !Sub www.${DomainName}
+      DomainValidationOptions:
+        - DomainName: !Ref DomainName
+          ValidationDomain: !Ref DomainName
+Outputs:
+  CertificateArn:
+    Value: !Ref AcmCertificate
+    Description: ACM Certificate ARN
