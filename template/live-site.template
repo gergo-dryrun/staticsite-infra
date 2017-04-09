@@ -16,6 +16,23 @@ Parameters:
   OriginAccessId:
     Description: Id of Origin Access Identity
     Type: String
+  CloudFrontAccessLogBucket:
+    Type: String
+    Default: ''
+    Description: "Enter a name for the Amazon S3 bucket where you want to store Amazon\
+      \ CloudFront access logs. Has to be an existing bucket."
+  UseWAF:
+    Type: String
+    Default: 'yes'
+    AllowedValues: ['yes', 'no']
+    Description: Choose yes if you want to use WAF.
+  WebACLId:
+    Description: Id of existing Web ACL. Leave none if UseWAF is set to no
+    Default: 'none'
+    Type: String
+
+Conditions:
+  UseWAFActivated: !Equals [!Ref UseWAF, 'yes']
 
 Resources:
 
@@ -57,7 +74,10 @@ Resources:
 #          MinimumProtocolVersion: TLSv1
 #          SslSupportMethod: sni-only
           CloudFrontDefaultCertificate: true
-##      WebACLId: !Ref WebAcl
+        WebACLId: !If [UseWAFActivated, !Ref WebACLId, !Ref "AWS::NoValue"]
+        Logging:
+          Bucket: !Sub ${CloudFrontAccessLogBucket}.s3.amazonaws.com
+          Prefix: !Sub ${DomainName}/
 
   PrdS3Bucket:
     Type: AWS::S3::Bucket

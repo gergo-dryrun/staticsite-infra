@@ -1,0 +1,239 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Deploys full infrastructure backbone'
+
+
+Metadata:
+
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Minimal Settings
+      Parameters: [DomainName, AcmCertArn, CloudFrontAccessLogBucket]
+    - Label:
+        default: Configure test environment
+      Parameters: [CreateTestEnvironment, TestSubdomain, IpWhitelist]
+    - Label:
+        default: Security Related Settings
+      Parameters: [UseWAF, ProvisionSecurityAutomations, ExistingWebACL]
+    - Label:
+        default: SecurityAutomations Protection List
+      Parameters: [SqlInjectionProtectionParam, CrossSiteScriptingProtectionParam,
+        ActivateHttpFloodProtectionParam, ActivateScansProbesProtectionParam, ActivateReputationListsProtectionParam,
+        ActivateBadBotProtectionParam]
+    - Label:
+        default: SecurityAutomations Advanced Settings
+      Parameters: [RequestThreshold, ErrorThreshold, WAFBlockPeriod]
+    - Label:
+        default: SecurityAutomations Anonymous Metrics Request
+      Parameters: [SendAnonymousUsageData]
+
+    ParameterLabels:
+      SqlInjectionProtectionParam:
+        default: Activate SQL Injection Protection
+      CrossSiteScriptingProtectionParam:
+        default: Activate Cross-site Scripting Protection
+      ActivateHttpFloodProtectionParam:
+        default: Activate HTTP Flood Protection
+      ActivateScansProbesProtectionParam:
+        default: Activate Scanner & Probe Protection
+      ActivateReputationListsProtectionParam:
+        default: Activate Reputation List Protection
+      ActivateBadBotProtectionParam:
+        default: Activate Bad Bot Protection
+      CloudFrontAccessLogBucket:
+        default: CloudFront Access Log Bucket Name
+      SendAnonymousUsageData:
+        default: Send Anonymous Usage Data
+      RequestThreshold:
+        default: Request Threshold
+      ErrorThreshold:
+        default: Error Threshold
+      WAFBlockPeriod:
+        default: WAF Block Period
+      IpWhitelist:
+        default: Test environment IP Whitelist
+      TestSubdomain:
+        default: Test environment subdomain
+      DomainName:
+        default: Domain name for site
+      AcmCertArn:
+        default: ACM Certificate ARN
+      ProvisionSecurityAutomations:
+        default: Provision Security Automations
+      ExistingWebACL:
+        default: Use existing ACL
+      UseWAF:
+        default: Configure WAF
+      CreateTestEnvironment:
+        default: Create restricted access test environment
+
+Parameters:
+  SqlInjectionProtectionParam:
+    Type: String
+    Default: 'yes'
+    AllowedValues: ['yes', 'no']
+    Description: Choose yes to enable the component designed to block common SQL injection
+      attacks.
+  CrossSiteScriptingProtectionParam:
+    Type: String
+    Default: 'yes'
+    AllowedValues: ['yes', 'no']
+    Description: Choose yes to enable the component designed to block common XSS attacks.
+  ActivateHttpFloodProtectionParam:
+    Type: String
+    Default: 'yes'
+    AllowedValues: ['yes', 'no']
+    Description: Choose yes to enable the component designed to block HTTP flood attacks.
+  ActivateScansProbesProtectionParam:
+    Type: String
+    Default: 'yes'
+    AllowedValues: ['yes', 'no']
+    Description: Choose yes to enable the component designed to block scanners and
+      probes.
+  ActivateReputationListsProtectionParam:
+    Type: String
+    Default: 'yes'
+    AllowedValues: ['yes', 'no']
+    Description: 'Choose yes to block requests from IP addresses on third-party reputation
+      lists (supported lists: spamhaus, torproject, and emergingthreats).'
+  ActivateBadBotProtectionParam:
+    Type: String
+    Default: 'yes'
+    AllowedValues: ['yes', 'no']
+    Description: Choose yes to enable the component designed to block bad bots and
+      content scrapers.
+  SendAnonymousUsageData:
+    Type: String
+    Default: 'yes'
+    AllowedValues: ['yes', 'no']
+    Description: Send anonymous data to AWS to help us understand solution usage across
+      our customer base as a whole. To opt out of this feature, select No.
+  RequestThreshold:
+    Type: Number
+    Default: '400'
+    Description: If you chose yes for the Activate HTTP Flood Protection parameter,
+      enter the maximum acceptable requests per minute per IP address. If you chose
+      to deactivate this protection, ignore this parameter.
+  ErrorThreshold:
+    Type: Number
+    Default: '50'
+    Description: If you chose yes for the Activate Scanners & Probes Protection parameter,
+      enter the maximum acceptable bad requests per minute per IP. If you chose to
+      deactivate Scanners & Probes protection, ignore this parameter.
+  WAFBlockPeriod:
+    Type: Number
+    Default: '240'
+    Description: If you chose yes for the Activate HTTP Flood Protection or Activate
+      Scanners & Probes Protection parameters, enter the period (in minutes) to block
+      applicable IP addresses. If you chose to deactivate both types of protection,
+      ignore this parameter.
+  DomainName:
+    Description: FQDN of site
+    Type: String
+    Default: gergo.me
+  AcmCertArn:
+    Description: ARN of ACM Certificate deployed in us-east-1
+    Type: String
+    Default: "arn:"
+  TestSubdomain:
+    Description: Subdomain for test environment
+    Type: String
+    Default: test
+  IpWhitelist:
+    Description: Comma delimited CIDR to whitelist for test environment. AT LEAST ONE VALUE IS NEEDED!
+    Type: CommaDelimitedList
+    Default: 127.0.0.1/32
+  ProvisionSecurityAutomations:
+    Type: String
+    Default: 'yes'
+    AllowedValues: ['yes', 'no']
+    Description: Choose yes to provision Security Automations.
+  ExistingWebACL:
+    Type: String
+    Default: 'none'
+    Description: Existing Security Automation Web ACL id. Leave default value if you are provisioning security automations.
+  UseWAF:
+    Type: String
+    Default: 'yes'
+    AllowedValues: ['yes', 'no']
+    Description: Choose yes if you want to use WAF.
+  CreateTestEnvironment:
+    Type: String
+    Default: 'yes'
+    AllowedValues: ['yes', 'no']
+    Description: Choose yes if you want a test environment using S3 static hosted website.
+  CloudFrontAccessLogBucket:
+    Type: String
+    Default: 'gergo-me-infra-logs'
+    Description: "Enter a name for the Amazon S3 bucket where you want to store Amazon\
+      \ CloudFront access logs. Has to be an existing bucket unless provision security automations is se to yes."
+
+Conditions:
+  SecurityAutomationsActivated: !Equals [!Ref 'ProvisionSecurityAutomations', 'yes']
+  UseWAFActivated: !Equals [!Ref 'UseWAF', 'yes']
+  SecurityActivated: !And [{Condition: SecurityAutomationsActivated}, {Condition: UseWAFActivated}]
+  CreateTestEnvironmentActivated: !Equals [!Ref 'CreateTestEnvironment', 'yes']
+
+Resources:
+
+  CloudFrontOAI:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/template/cloudfront-oai.template
+      TimeoutInMinutes: '15'
+
+  LiveStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/template/live-site.template
+      TimeoutInMinutes: '60'
+      Parameters:
+        DomainName: !Ref DomainName
+        AcmCertArn: !Ref AcmCertArn
+        UseWAF: !Ref UseWAF
+        WebACLId:  !If [SecurityAutomationsActivated, !GetAtt SecurityAutomations.Outputs.WebACL, !Ref ExistingWebACL]
+        CloudFrontAccessLogBucket: !Ref CloudFrontAccessLogBucket
+        OriginAccessId: !GetAtt CloudFrontOAI.Outputs.OriginAccessId
+        S3CanonicalUserId: !GetAtt CloudFrontOAI.Outputs.S3CanonicalUserId
+
+  TestStack:
+    Condition: CreateTestEnvironmentActivated
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/template/test-site.template
+      TimeoutInMinutes: '15'
+      Parameters:
+        DomainName: !Ref DomainName
+        TestSubdomain: !Ref TestSubdomain
+        IpWhitelist:
+          Fn::Join:
+            - ','
+            - !Ref IpWhitelist
+
+  SecurityAutomations:
+    Type: AWS::CloudFormation::Stack
+    Condition: SecurityActivated
+    Properties:
+      TemplateURL: https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/template/aws-waf-security-automations.template
+      TimeoutInMinutes: '15'
+      Parameters:
+        SqlInjectionProtectionParam: !Ref 'SqlInjectionProtectionParam'
+        CrossSiteScriptingProtectionParam: !Ref 'CrossSiteScriptingProtectionParam'
+        ActivateHttpFloodProtectionParam: !Ref 'ActivateHttpFloodProtectionParam'
+        ActivateScansProbesProtectionParam: !Ref 'ActivateScansProbesProtectionParam'
+        ActivateReputationListsProtectionParam: !Ref 'ActivateReputationListsProtectionParam'
+        ActivateBadBotProtectionParam: !Ref 'ActivateBadBotProtectionParam'
+        CloudFrontAccessLogBucket: !Ref 'CloudFrontAccessLogBucket'
+        SendAnonymousUsageData: !Ref 'SendAnonymousUsageData'
+        RequestThreshold: !Ref 'RequestThreshold'
+        ErrorThreshold: !Ref 'ErrorThreshold'
+        WAFBlockPeriod: !Ref 'WAFBlockPeriod'
+
+Outputs:
+  LiveWebsiteURL:
+    Value: !GetAtt LiveStack.Outputs.LiveWebsiteURL
+    Description: URL for live site exposed via CloudFront
+  TestWebsiteURL:
+    Condition: CreateTestEnvironmentActivated
+    Value: !GetAtt TestStack.Outputs.TestWebsiteURL
+    Description: URL for test website hosted on S3

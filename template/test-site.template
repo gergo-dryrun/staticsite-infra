@@ -11,10 +11,9 @@ Parameters:
     Type: String
     Default: test
   IpWhitelist:
-    Description: CIDR to whitelist for test environment
-    Type: String
-    Default: my-ip/32
-
+    Description: CIDR to whitelist for test environment. AT LEAST ONE VALUE IS NEEDED!
+    Type: CommaDelimitedList
+    Default: 127.0.0.1/32
 
 Mappings:
 # Mapping from http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
@@ -88,7 +87,6 @@ Resources:
             Condition:
               IpAddress:
                 aws:SourceIp: !Ref IpWhitelist
-
 
   sitRecordSet:
     Type: AWS::Route53::RecordSet
