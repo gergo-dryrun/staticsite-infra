@@ -11,6 +11,7 @@ Resources:
 
   CreateOAI:
     Type: AWS::Lambda::Function
+    DependsOn: LambdaRolePolicies
     Properties:
       FunctionName: create-cf-origin-access-identity
       Runtime: python2.7

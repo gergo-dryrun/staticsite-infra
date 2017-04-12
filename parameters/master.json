@@ -1,0 +1,34 @@
+[
+  {
+    "ParameterKey": "CloudFrontAccessLogBucket",
+    "ParameterValue": ""
+  },
+  {
+    "ParameterKey": "DomainName",
+    "ParameterValue": ""
+  },
+  {
+    "ParameterKey": "AcmCertArn",
+    "ParameterValue": ""
+  },
+  {
+    "ParameterKey": "TestSubdomain",
+    "ParameterValue": "test"
+  },
+  {
+    "ParameterKey": "IpWhitelist",
+    "ParameterValue": "0.0.0.0/0"
+  },
+  {
+    "ParameterKey": "ProvisionSecurityAutomations",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "UseWAF",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "CreateTestEnvironment",
+    "ParameterValue": "yes"
+  }
+]
