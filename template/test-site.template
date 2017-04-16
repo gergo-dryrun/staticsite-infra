@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Creates CloudFront distribution with s3 as origin.'
+Description: 'Creates public s3 static site with IP whitelisting.'
 
 Parameters:
   DomainName:
@@ -65,7 +65,7 @@ Resources:
 
   SitS3Bucket:
     Type: AWS::S3::Bucket
-    DeletionPolicy: Delete
+    DeletionPolicy: Retain
     Properties:
       BucketName: !Sub ${TestSubdomain}.${DomainName}
       WebsiteConfiguration:

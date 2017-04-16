@@ -1,7 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Deploys full infrastructure backbone'
 
-
 Metadata:
 
   AWS::CloudFormation::Interface:
@@ -70,7 +69,7 @@ Metadata:
 Parameters:
   SqlInjectionProtectionParam:
     Type: String
-    Default: 'yes'
+    Default: 'no'
     AllowedValues: ['yes', 'no']
     Description: Choose yes to enable the component designed to block common SQL injection
       attacks.
@@ -104,7 +103,7 @@ Parameters:
       content scrapers.
   SendAnonymousUsageData:
     Type: String
-    Default: 'yes'
+    Default: 'no'
     AllowedValues: ['yes', 'no']
     Description: Send anonymous data to AWS to help us understand solution usage across
       our customer base as a whole. To opt out of this feature, select No.
@@ -196,7 +195,7 @@ Resources:
         OriginAccessId: !GetAtt CloudFrontOAI.Outputs.OriginAccessId
         S3CanonicalUserId: !GetAtt CloudFrontOAI.Outputs.S3CanonicalUserId
 
-  TestStack:
+  TestEnvironment:
     Condition: CreateTestEnvironmentActivated
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -235,5 +234,5 @@ Outputs:
     Description: URL for live site exposed via CloudFront
   TestWebsiteURL:
     Condition: CreateTestEnvironmentActivated
-    Value: !GetAtt TestStack.Outputs.TestWebsiteURL
+    Value: !GetAtt TestEnvironment.Outputs.TestWebsiteURL
     Description: URL for test website hosted on S3
