@@ -13,7 +13,6 @@ Resources:
     Type: AWS::Lambda::Function
     DependsOn: LambdaRolePolicies
     Properties:
-      FunctionName: create-cf-origin-access-identity
       Runtime: python2.7
       Handler: create_oai.handler
       Role: !GetAtt LambdaExecutionerRole.Arn
@@ -66,7 +65,7 @@ Resources:
               - logs:PutLogEvents
             Resource:
               !Sub |-
-                arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/create-cf-origin-access-identity:*
+                arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*
       Roles:
         -
           !Ref LambdaExecutionerRole
