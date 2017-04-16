@@ -20,17 +20,17 @@ Additionaly includes separate template for:
 * Means to verify e-mail sent out by ACM. [2]
 
 #### Setup
-Deploy the acm-certificate.template stack first, make sure you do it in US East (N. Virginia).
+Deploy the `acm-certificate.template` stack first, make sure you do it in US East (N. Virginia).
 
 [<img src="https://s3-eu-west-1.amazonaws.com/quickstart-cloudtrail-to-elasticsearch/cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=acm-certificate&templateURL=https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/template/acm-certificate.template)
 
 ![Certificate parameters](https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/screenshots/acm-certificate.png)
 
-This will issue a certificate for both www.{domainName} and {domainName}
+This will issue a certificate for both `www.{domainName}` and `{domainName}`
 
 Grab the CertificateArn from Outputs tab and save it for the next step.
 
-Deploy the master.template
+Deploy the `master.template`
 
 [<img src="https://s3-eu-west-1.amazonaws.com/quickstart-cloudtrail-to-elasticsearch/cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?#/stacks/new?stackName=staticsite-infra&templateURL=https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/template/master.template)
 
@@ -38,11 +38,11 @@ Quite a few parameters are needed, the defaults should be fine for most of them 
 
 ![Master template](https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/screenshots/master.png)
 
-Use the ACM Certificate ARN obtained from previous step.
+Use the `ACM Certificate ARN` obtained from previous step.
 
-If you don't want to use WAF then set Configure WAF to 'no' and keep in mind that the CloudFront Access Log Bucket has to exist before deploying this stack.
+If you don't want to use WAF then set `Configure WAF` to `no` and keep in mind that the `CloudFront Access Log Bucket` has to exist before deploying this stack.
 
-If you already have a WebACL with security automations configured, set Provision Security Atuomations to 'no' and use the id of the WebACL that you want to re-use.
+If you already have a WebACL with security automations configured, set `Provision Security Atuomations` to `no` and use the id of the WebACL that you want to re-use.
 
 To read more about the WAF Security Automations I recommend giving [aws security automation quickstart](https://aws.amazon.com/answers/security/aws-waf-security-automations/) a read through.
 
@@ -56,9 +56,9 @@ Depending whether you selected to also create a testing environment you will end
 * live.{DomainName}
 * test.{DomainName}
 
-Both of them have been configured with default IndexDocument: index.html
+Both of them have been configured with default IndexDocument: `index.html`
 
-If you want to be more autonomous I recommend forking this repo and adjust the parameter files under /parameters/ folder.
+If you want to be more autonomous I recommend forking this repo and adjust the parameter files under `/parameters/` folder.
 
 Then you can just use the Makefile to deploy/update the stack:
 
