@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "CloudFrontAccessLogBucket",
+    "ParameterValue": "example-com-infra-logs"
+  },
+  {
+    "ParameterKey": "SendAnonymousUsageData",
+    "ParameterValue": "yes"
+  }
+]

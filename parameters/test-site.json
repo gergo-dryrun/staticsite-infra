@@ -1,0 +1,14 @@
+[
+  {
+    "ParameterKey": "DomainName",
+    "ParameterValue": "example.com"
+  },
+  {
+    "ParameterKey": "TestSubdomain",
+    "ParameterValue": "test"
+  },
+  {
+    "ParameterKey": "IpWhitelist",
+    "ParameterValue": "0.0.0.0/0"
+  }
+]

@@ -1,15 +1,15 @@
 [
   {
     "ParameterKey": "CloudFrontAccessLogBucket",
-    "ParameterValue": ""
+    "ParameterValue": "example-com-infra-logs"
   },
   {
     "ParameterKey": "DomainName",
-    "ParameterValue": ""
+    "ParameterValue": "example.com"
   },
   {
     "ParameterKey": "AcmCertArn",
-    "ParameterValue": ""
+    "ParameterValue": "arn:aws:acm:us-east-1:ACCOUNT_NUMBER:certificate/CERT_ID"
   },
   {
     "ParameterKey": "TestSubdomain",
@@ -21,14 +21,18 @@
   },
   {
     "ParameterKey": "ProvisionSecurityAutomations",
-    "ParameterValue": "no"
+    "ParameterValue": "yes"
   },
   {
     "ParameterKey": "UseWAF",
-    "ParameterValue": "no"
+    "ParameterValue": "yes"
   },
   {
     "ParameterKey": "CreateTestEnvironment",
+    "ParameterValue": "yes"
+  },
+  {
+    "ParameterKey": "SendAnonymousUsageData",
     "ParameterValue": "yes"
   }
 ]
