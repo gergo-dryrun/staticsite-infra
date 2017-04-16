@@ -64,15 +64,15 @@ Then you can just use the Makefile to deploy/update the stack:
 
 ```bash
 # To create stack
-make STACK_NAME=acm-certificate REGION=us-east-1 create
+make STACK_NAME=acm-certificate-example.com STACK=acm-certificate REGION=us-west-1 create
 # To poll for events
-make STACK_NAME=acm-certificate REGION=us-east-1 watch
+make STACK_NAME=acm-certificate-example.com STACK=acm-certificate REGION=us-east-1 watch
 # To see the stack outputs
-make STACK_NAME=acm-certificate REGION=us-east-1 output
+make STACK_NAME=acm-certificate-example.com STACK=acm-certificate REGION=us-east-1 output
 # To update the stack
-make STACK_NAME=acm-certificate REGION=us-east-1 update
+make STACK_NAME=acm-certificate-example.com STACK=acm-certificate REGION=us-east-1 update
 # To delete the stack
-make STACK_NAME=acm-certificate REGION=us-east-1 delete
+make STACK_NAME=acm-certificate-example.com STACK=acm-certificate REGION=us-east-1 delete
 ```
 
 This works with any template that has an associated parameter file.
