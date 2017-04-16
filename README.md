@@ -6,7 +6,7 @@ This project includes a master CloudFormation template that bundles up independe
 
  * Creating CloudFront distribution with s3 bucket as origin
  * Creates CloudFront Origin Access Identity to protect s3 bucket
- * [Optional] Creates WAF with a suite fo security automations
+ * [Optional] Creates WAF with a suite of security automations
  * [Optional] Creates IP restricted test environment
 
 Additionaly includes separate template for:
@@ -21,6 +21,7 @@ Additionaly includes separate template for:
 
 #### Setup
 Deploy the acm-certificate.template stack first, make sure you do it in US East (N. Virginia).
+
 [<img src="https://s3-eu-west-1.amazonaws.com/quickstart-cloudtrail-to-elasticsearch/cloudformation-launch-stack.png">](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=acm-certificate&templateURL=https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/template/acm-certificate.template)
 
 ![Certificate parameters](https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/screenshots/acm-certificate.png)
@@ -79,7 +80,7 @@ This works with any template that has an associated parameter file.
 #### Tips & gotchas
 If you visit the live site before the DNS has fully propagated within AWS CloudFront, you might get a 307 Temporary Redirect, so I recommend waiting 20-30 minutes before visiting the site after the stack has been deployed.
 
-Otherwise you might have to Create a CloudFront invalidation to clear the DNS cache.
+If you do end up with 307 and don't want to wait 24h for cloudfront cache to clear you will have to Create a `CloudFront invalidation`  for `*` to forceclear the DNS cache.
 
 WAF can be a bit expensive if all you really host is a static site. Please make sure you check out the [Pricing model](https://aws.amazon.com/waf/pricing/) before deploying anything.
 
@@ -87,4 +88,4 @@ WAF can be a bit expensive if all you really host is a static site. Please make 
 
  [1] <http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/creating-migrating.html>
 
- [2] <http://docs.aws.amazon.com/acm/latest/usergu
+ [2] <http://docs.aws.amazon.com/acm/latest/userguide/setup-email.html>
