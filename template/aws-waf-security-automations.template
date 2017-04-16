@@ -703,8 +703,9 @@ Resources:
           Statement:
           - Effect: Allow
             Action: lambda:InvokeFunction
-            Resource: !Join ['', ['arn:aws:lambda:', !Ref 'AWS::Region', ':', !Ref 'AWS::AccountId',
-                ':function:', !Ref 'AWS::StackName', -LambdaWAFReputationLists*]]
+            Resource: !If [ReputationListsProtectionActivated,
+              !GetAtt [LambdaWAFReputationListsParserFunction, Arn], !Join ['', ['arn:aws:lambda:', !Ref 'AWS::Region', ':', !Ref 'AWS::AccountId',
+                ':function:', !Ref 'AWS::StackName', -LambdaWAFReputationLists*]]]
       - PolicyName: WAFAccess
         PolicyDocument:
           Version: '2012-10-17'
@@ -753,8 +754,8 @@ Resources:
       Handler: custom-resource.lambda_handler
       Role: !GetAtt [LambdaRoleCustomResource, Arn]
       Code:
-        S3Bucket: !Join ['', [solutions-, !Ref 'AWS::Region']]
-        S3Key: aws-waf-security-automations/v2/custom-resource.zip
+        S3Bucket: dryrun.cloud-resources
+        S3Key: 2017-04-09-getting-started-static-sites/custom-resource.zip
       Runtime: python2.7
       MemorySize: '128'
       Timeout: '300'
