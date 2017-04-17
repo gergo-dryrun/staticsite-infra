@@ -175,12 +175,6 @@ Conditions:
 
 Resources:
 
-  CloudFrontOAI:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/template/cloudfront-oai.template
-      TimeoutInMinutes: '15'
-
   LiveStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -192,8 +186,6 @@ Resources:
         UseWAF: !Ref UseWAF
         WebACLId:  !If [SecurityAutomationsActivated, !GetAtt SecurityAutomations.Outputs.WebACL, !Ref ExistingWebACL]
         CloudFrontAccessLogBucket: !Ref CloudFrontAccessLogBucket
-        OriginAccessId: !GetAtt CloudFrontOAI.Outputs.OriginAccessId
-        S3CanonicalUserId: !GetAtt CloudFrontOAI.Outputs.S3CanonicalUserId
 
   TestEnvironment:
     Condition: CreateTestEnvironmentActivated

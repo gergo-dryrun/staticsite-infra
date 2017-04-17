@@ -10,12 +10,6 @@ Parameters:
     Description: ARN of ACM Certificate deployed in us-east-1
     Type: String
     Default: "arn:"
-  S3CanonicalUserId:
-    Description: S3CanonicalUserId of Origin Access Identity
-    Type: String
-  OriginAccessId:
-    Description: Id of Origin Access Identity
-    Type: String
   CloudFrontAccessLogBucket:
     Type: String
     Default: ''
@@ -34,6 +28,38 @@ Parameters:
 Conditions:
   UseWAFActivated: !Equals [!Ref UseWAF, 'yes']
 
+Mappings:
+# Mapping from http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+  RegionMap:
+    sa-east-1:
+      endpoint: s3-website-sa-east-1.amazonaws.com
+    eu-west-2:
+      endpoint: s3-website.eu-west-2.amazonaws.com
+    eu-west-1:
+      endpoint: s3-website-eu-west-1.amazonaws.com
+    eu-central-1:
+      endpoint: s3-website.eu-central-1.amazonaws.com
+    ap-northeast-1:
+      endpoint: s3-website-ap-northeast-1.amazonaws.com
+    ap-southeast-2:
+      endpoint: s3-website-ap-southeast-2.amazonaws.com
+    ap-southeast-1:
+      endpoint: s3-website-ap-southeast-1.amazonaws.com
+    ap-northeast-2:
+      endpoint: s3-website.ap-northeast-2.amazonaws.com
+    ap-south-1:
+      endpoint: s3-website.ap-south-1.amazonaws.com
+    ca-central-1:
+      endpoint: s3-website.ca-central-1.amazonaws.com
+    us-west-2:
+      endpoint: s3-website-us-west-2.amazonaws.com
+    us-west-1:
+      endpoint: s3-website-us-west-1.amazonaws.com
+    us-east-2:
+      endpoint: s3-website.us-east-2.amazonaws.com
+    us-east-1:
+      endpoint: s3-website-us-east-1.amazonaws.com
+
 Resources:
 
   CfDistribution:
@@ -43,15 +69,15 @@ Resources:
     Properties:
       DistributionConfig:
         Origins:
-        - DomainName: !Sub live.${DomainName}.s3.amazonaws.com
+        - DomainName:
+            Fn::Sub:
+              - live.${DomainName}.${s3Suffix}
+              - s3Suffix: !FindInMap [ RegionMap, !Ref "AWS::Region", endpoint ]
           Id: live-s3-origin
-          S3OriginConfig:
-             OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessId}
+          CustomOriginConfig:
+            OriginProtocolPolicy: http-only
         Enabled: true
         HttpVersion: http2
-        # IsIPV6Enabled: true
-        # Apparently not yet available
-        # Encountered unsupported property IsIPV6Enabled
         Aliases:
           - !Ref DomainName
           - !Sub www.${DomainName}
@@ -68,7 +94,6 @@ Resources:
           AcmCertificateArn: !Ref AcmCertArn
           MinimumProtocolVersion: TLSv1
           SslSupportMethod: sni-only
-#          CloudFrontDefaultCertificate: true
         WebACLId: !If [UseWAFActivated, !Ref WebACLId, !Ref "AWS::NoValue"]
         Logging:
           Bucket: !Sub ${CloudFrontAccessLogBucket}.s3.amazonaws.com
@@ -94,8 +119,7 @@ Resources:
               - s3:GetObject
             Effect: Allow
             Resource: !Sub arn:aws:s3:::live.${DomainName}/*
-            Principal:
-              CanonicalUser: !Ref S3CanonicalUserId
+            Principal: "*"
 
   wwwRecordSet:
     Type: AWS::Route53::RecordSet
