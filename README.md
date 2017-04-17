@@ -2,16 +2,15 @@
 ###### Cloudformation stack suite to deploy static site behind cloudfront with optional test environment and WAF protection
 
 
-This project includes a master CloudFormation template that bundles up independent stacks for:
+This project includes a master CloudFormation template that bundles up independent stacks:
 
- * Creating CloudFront distribution with s3 bucket as origin
- * Creates CloudFront Origin Access Identity to protect s3 bucket
- * [Optional] Creates WAF with a suite of security automations
- * [Optional] Creates IP restricted test environment
+ * CloudFront distribution with s3 bucket as origin
+ * [Optional] WebACL with a suite of security automations
+ * [Optional] IP restricted test environment
 
-Additionaly includes separate template for:
+Additionally includes separate template for:
 
- * Creating an ACM SSL certificate
+ * ACM SSL certificate
 
 
 #### Prerequisites
