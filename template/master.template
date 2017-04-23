@@ -9,8 +9,8 @@ Metadata:
         default: Minimal Settings
       Parameters: [DomainName, AcmCertArn, CloudFrontAccessLogBucket]
     - Label:
-        default: Configure test environment
-      Parameters: [CreateTestEnvironment, TestSubdomain, IpWhitelist]
+        default: Configure staging environment
+      Parameters: [CreateStagingEnvironment, StagingSubdomain, IpWhitelist]
     - Label:
         default: Security Related Settings
       Parameters: [UseWAF, ProvisionSecurityAutomations, ExistingWebACL]
@@ -50,9 +50,9 @@ Metadata:
       WAFBlockPeriod:
         default: WAF Block Period
       IpWhitelist:
-        default: Test environment IP Whitelist
-      TestSubdomain:
-        default: Test environment subdomain
+        default: Staging environment IP Whitelist
+      StagingSubdomain:
+        default: Staging environment subdomain
       DomainName:
         default: Domain name for site
       AcmCertArn:
@@ -63,8 +63,8 @@ Metadata:
         default: Use existing ACL
       UseWAF:
         default: Configure WAF
-      CreateTestEnvironment:
-        default: Create restricted access test environment
+      CreateStagingEnvironment:
+        default: Create restricted access staging environment
 
 Parameters:
   SqlInjectionProtectionParam:
@@ -134,12 +134,12 @@ Parameters:
     Description: ARN of ACM Certificate deployed in us-east-1
     Type: String
     Default: "arn:"
-  TestSubdomain:
-    Description: Subdomain for test environment
+  StagingSubdomain:
+    Description: Subdomain for staging environment
     Type: String
-    Default: test
+    Default: staging
   IpWhitelist:
-    Description: Comma delimited CIDR to whitelist for test environment. AT LEAST ONE VALUE IS NEEDED!
+    Description: Comma delimited CIDR to whitelist for staging environment. AT LEAST ONE VALUE IS NEEDED!
     Type: CommaDelimitedList
     Default: 127.0.0.1/32
   ProvisionSecurityAutomations:
@@ -156,11 +156,11 @@ Parameters:
     Default: 'yes'
     AllowedValues: ['yes', 'no']
     Description: Choose yes if you want to use WAF.
-  CreateTestEnvironment:
+  CreateStagingEnvironment:
     Type: String
     Default: 'yes'
     AllowedValues: ['yes', 'no']
-    Description: Choose yes if you want a test environment using S3 static hosted website.
+    Description: Choose yes if you want a staging environment using S3 static hosted website.
   CloudFrontAccessLogBucket:
     Type: String
     Default: 'gergo-me-infra-logs'
@@ -171,7 +171,7 @@ Conditions:
   SecurityAutomationsActivated: !Equals [!Ref 'ProvisionSecurityAutomations', 'yes']
   UseWAFActivated: !Equals [!Ref 'UseWAF', 'yes']
   SecurityActivated: !And [{Condition: SecurityAutomationsActivated}, {Condition: UseWAFActivated}]
-  CreateTestEnvironmentActivated: !Equals [!Ref 'CreateTestEnvironment', 'yes']
+  CreateStagingEnvironmentActivated: !Equals [!Ref 'CreateStagingEnvironment', 'yes']
 
 Resources:
 
@@ -187,15 +187,15 @@ Resources:
         WebACLId:  !If [SecurityAutomationsActivated, !GetAtt SecurityAutomations.Outputs.WebACL, !Ref ExistingWebACL]
         CloudFrontAccessLogBucket: !Ref CloudFrontAccessLogBucket
 
-  TestEnvironment:
-    Condition: CreateTestEnvironmentActivated
+  StagingEnvironment:
+    Condition: CreateStagingEnvironmentActivated
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/template/test-site.template
+      TemplateURL: https://s3-eu-west-1.amazonaws.com/dryrun.cloud-resources/2017-04-09-getting-started-static-sites/template/staging-site.template
       TimeoutInMinutes: '15'
       Parameters:
         DomainName: !Ref DomainName
-        TestSubdomain: !Ref TestSubdomain
+        StagingSubdomain: !Ref StagingSubdomain
         IpWhitelist:
           Fn::Join:
             - ','
@@ -224,7 +224,7 @@ Outputs:
   LiveWebsiteURL:
     Value: !GetAtt LiveStack.Outputs.LiveWebsiteURL
     Description: URL for live site exposed via CloudFront
-  TestWebsiteURL:
-    Condition: CreateTestEnvironmentActivated
-    Value: !GetAtt TestEnvironment.Outputs.TestWebsiteURL
-    Description: URL for test website hosted on S3
+  StagingWebsiteURL:
+    Condition: CreateStagingEnvironmentActivated
+    Value: !GetAtt StagingEnvironment.Outputs.StagingWebsiteURL
+    Description: URL for staging website hosted on S3
