@@ -1,0 +1,18 @@
+[
+  {
+    "ParameterKey": "CloudFrontAccessLogBucket",
+    "ParameterValue": "example-com-infra-logs"
+  },
+  {
+    "ParameterKey": "DomainName",
+    "ParameterValue": "example.com"
+  },
+  {
+    "ParameterKey": "AcmCertArn",
+    "ParameterValue": "arn:aws:acm:us-east-1:ACCOUNT_NUMBER:certificate/CERT_ID"
+  },
+  {
+    "ParameterKey": "UseWAF",
+    "ParameterValue": "no"
+  }
+]

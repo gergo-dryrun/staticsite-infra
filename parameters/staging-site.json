@@ -4,8 +4,8 @@
     "ParameterValue": "example.com"
   },
   {
-    "ParameterKey": "TestSubdomain",
-    "ParameterValue": "test"
+    "ParameterKey": "StagingSubdomain",
+    "ParameterValue": "staging"
   },
   {
     "ParameterKey": "IpWhitelist",

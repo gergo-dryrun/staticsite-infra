@@ -12,8 +12,8 @@
     "ParameterValue": "arn:aws:acm:us-east-1:ACCOUNT_NUMBER:certificate/CERT_ID"
   },
   {
-    "ParameterKey": "TestSubdomain",
-    "ParameterValue": "test"
+    "ParameterKey": "StagingSubdomain",
+    "ParameterValue": "staging"
   },
   {
     "ParameterKey": "IpWhitelist",
@@ -21,18 +21,18 @@
   },
   {
     "ParameterKey": "ProvisionSecurityAutomations",
-    "ParameterValue": "yes"
+    "ParameterValue": "no"
   },
   {
     "ParameterKey": "UseWAF",
-    "ParameterValue": "yes"
+    "ParameterValue": "no"
   },
   {
-    "ParameterKey": "CreateTestEnvironment",
+    "ParameterKey": "CreateStagingEnvironment",
     "ParameterValue": "yes"
   },
   {
     "ParameterKey": "SendAnonymousUsageData",
-    "ParameterValue": "yes"
+    "ParameterValue": "no"
   }
 ]
