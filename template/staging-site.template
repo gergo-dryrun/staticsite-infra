@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Creates public s3 static site with IP whitelisting.'
+
+Parameters:
+  DomainName:
+    Description: Domain name
+    Type: String
+    Default: gergo.me
+  StagingSubdomain:
+    Description: Subdomain for staging environment
+    Type: String
+    Default: staging
+  IpWhitelist:
+    Description: CIDR to whitelist for staging environment. AT LEAST ONE VALUE IS NEEDED!
+    Type: CommaDelimitedList
+    Default: 127.0.0.1/32
+
+Mappings:
+# Mapping from http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+  RegionMap:
+    sa-east-1:
+      endpoint: s3-website-sa-east-1.amazonaws.com
+      hostedzoneid: Z7KQH4QJS55SO
+    eu-west-2:
+      endpoint: s3-website.eu-west-2.amazonaws.com
+      hostedzoneid: Z3GKZC51ZF0DB4
+    eu-west-1:
+      endpoint: s3-website-eu-west-1.amazonaws.com
+      hostedzoneid: Z1BKCTXD74EZPE
+    eu-central-1:
+      endpoint: s3-website.eu-central-1.amazonaws.com
+      hostedzoneid: Z21DNDUVLTQW6Q
+    ap-northeast-1:
+      endpoint: s3-website-ap-northeast-1.amazonaws.com
+      hostedzoneid: Z2M4EHUR26P7ZW
+    ap-southeast-2:
+      endpoint: s3-website-ap-southeast-2.amazonaws.com
+      hostedzoneid: Z1WCIGYICN2BYD
+    ap-southeast-1:
+      endpoint: s3-website-ap-southeast-1.amazonaws.com
+      hostedzoneid: Z3O0J2DXBE1FTB
+    ap-northeast-2:
+      endpoint: s3-website.ap-northeast-2.amazonaws.com
+      hostedzoneid: Z3W03O7B5YMIYP
+    ap-south-1:
+      endpoint: s3-website.ap-south-1.amazonaws.com
+      hostedzoneid: Z11RGJOFQNVJUP
+    ca-central-1:
+      endpoint: s3-website.ca-central-1.amazonaws.com
+      hostedzoneid: Z1QDHH18159H29
+    us-west-2:
+      endpoint: s3-website-us-west-2.amazonaws.com
+      hostedzoneid: Z3BJ6K6RIION7M
+    us-west-1:
+      endpoint: s3-website-us-west-1.amazonaws.com
+      hostedzoneid: Z2F56UZL2M1ACD
+    us-east-2:
+      endpoint: s3-website.us-east-2.amazonaws.com
+      hostedzoneid: Z2O1EMRO9K5GLX
+    us-east-1:
+      endpoint: s3-website-us-east-1.amazonaws.com
+      hostedzoneid: Z3AQBSTGFYJSTF
+
+Resources:
+
+  SitS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub ${StagingSubdomain}.${DomainName}
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  SitBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Sub ${StagingSubdomain}.${DomainName}
+      PolicyDocument:
+        Statement:
+          -
+            Action:
+              - s3:GetObject
+            Effect: Allow
+            Resource: !Sub arn:aws:s3:::${StagingSubdomain}.${DomainName}/*
+            Principal: "*"
+            Condition:
+              IpAddress:
+                aws:SourceIp: !Ref IpWhitelist
+
+  sitRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !Sub ${DomainName}.
+      AliasTarget:
+        DNSName: !FindInMap [ RegionMap, !Ref "AWS::Region", endpoint ]
+        HostedZoneId: !FindInMap [ RegionMap, !Ref "AWS::Region", hostedzoneid ]
+      Comment: DNS name for sit s3 bucket.
+      Name: !Sub ${StagingSubdomain}.${DomainName}.
+      Type: A
+
+Outputs:
+  StagingWebsiteURL:
+    Value: !Sub http://${StagingSubdomain}.${DomainName}
+    Description: URL for staging website hosted on S3
+
